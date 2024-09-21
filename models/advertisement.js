@@ -14,6 +14,10 @@ const advertisementSchema = new mongoose.Schema({
     enum: ['Male', 'Female'], 
     required: true,
   },
+  locationName: {
+    type: String,
+    required: true,
+  },
   ageGroup: {
     type: String,
     enum: ['3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-70'],
