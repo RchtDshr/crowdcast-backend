@@ -39,8 +39,6 @@ const locationSchema = new Schema({
     required: true,
   },
   adGroupings: [adGroupingSchema],  // Array of ageGroup + gender + adIds
-}, {
-  timestamps: true  // Automatically adds createdAt and updatedAt fields
 });
 
 const Location = mongoose.model('Location', locationSchema);
