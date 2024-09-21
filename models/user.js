@@ -25,7 +25,7 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Advertisement'  // References the Advertisement model
   }],
-}, );
+});
 
 const User = mongoose.model('User', userSchema);
 

@@ -9,7 +9,6 @@ const validAgeGroups = [
 const validGenders = [
   'Male',  // Male
   'Female',  // Female
-  'Other'   // Other
 ];
 
 // Sub-schema to store age group, gender, and advertisement IDs

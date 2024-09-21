@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const advertisementSchema = new mongoose.Schema({
-  advertisementName: {
+  adName: {
     type: String,
     required: true,
   },
@@ -11,18 +11,18 @@ const advertisementSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other'],  // Optional: restrict to specific values
+    enum: ['Male', 'Female'], 
     required: true,
   },
   ageGroup: {
     type: String,
-    enum: ['Child', 'Teen', 'Adult', 'Senior'],  // You can modify these values based on the age groups
+    enum: ['3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-70'],
     required: true,
   },
   creditsDeducted: {
     type: Number,
-    required: true,
-    min: 0,  // Ensuring that credits deducted can't be negative
+    min: 0,  
+    default: 0
   },
 });
 

@@ -19,13 +19,17 @@ const timelineSchema = new Schema({
   },
   timeOfDisplay: {
     type: Date,
-    default: Date.now,  // Automatically sets the current time when an entry is created
+    default: Date.now, 
+    required: true,
+  },
+  ageGroup: {
+    type: String,
+    enum: ['3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-70'],
     required: true,
   },
   deductedAmount: {
     type: Number,
-    required: true,
-    min: 0  // Ensures deducted amount cannot be negative
+    min: 0 
   }
 });
 
