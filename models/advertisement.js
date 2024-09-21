@@ -24,8 +24,6 @@ const advertisementSchema = new mongoose.Schema({
     required: true,
     min: 0,  // Ensuring that credits deducted can't be negative
   },
-}, {
-  timestamps: true  // Automatically adds createdAt and updatedAt timestamps
 });
 
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
