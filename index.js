@@ -1,11 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
 require('dotenv').config();
 
 
-// Middleware to parse JSON bodies
-app.use(express.json());
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 
 // MongoDB Connection
