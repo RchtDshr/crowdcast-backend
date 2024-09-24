@@ -5,7 +5,7 @@ const isAuthenticated = (req, res, next) => {
       return next();
     } else {
       // User is not authenticated, redirect them to the sign-in page
-      return res.redirect('/signin');
+      return res.redirect('/user/signin');
     }
   };
   
