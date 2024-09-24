@@ -3,18 +3,18 @@ const Schema = mongoose.Schema;
 
 // Define valid age groups and gender values based on your provided structure
 const validAgeGroups = [
-  "3-9",
-  "10-19",
-  "20-29",
-  "30-39",
-  "40-49",
-  "50-59",
-  "60-70",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
 ];
 
 const validGenders = [
-  "Male", // Male
-  "Female", // Female
+  "M", // Male
+  "F", // Female
 ];
 
 // Sub-schema to store age group, gender, and advertisement IDs

@@ -24,7 +24,7 @@ const timelineSchema = new Schema({
   },
   ageGroup: {
     type: String,
-    enum: ['3-9', '10-19', '20-29', '30-39', '40-49', '50-59', '60-70'],
+    enum: ['1', '2', '3', '4', '5', '6', '7'],
     required: true,
   },
   deductedAmount: {
