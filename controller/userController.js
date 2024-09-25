@@ -79,7 +79,51 @@ const verifyOtp = async (req, res) => {
   }
 };
 
+const signin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    // If user not found, return error
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Compare the provided password with the hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    // If passwords don't match, return error
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Create a session for the user
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    res.status(200).json({ message: 'Signed in successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const signout = (req, res) => {
+  try {
+    // Destroy the user's session
+    req.session.destroy();
+    res.status(200).json({ message: 'Signed out successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports={
     signup,
-    verifyOtp
+    verifyOtp,
+    signin,
+    signout
 }

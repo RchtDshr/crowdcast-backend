@@ -6,13 +6,25 @@ const app = express();
 require('dotenv').config();
 const userRoutes=require('./routes/userRoutes')
 const adRoutes = require('./routes/adRoutes') 
+const session = require("express-session");
+
+
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
-
+app.use(
+  session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
+  })
+);
 app.use("/user", userRoutes);
 app.use("/api", adRoutes);
 
