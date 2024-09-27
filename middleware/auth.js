@@ -1,13 +1,22 @@
-const isAuthenticated = (req, res, next) => {
-    // Check if the user is authenticated
-    if (req.session && req.session.userId) {
-      // User is authenticated, allow them to proceed
-      return next();
-    } else {
-      // User is not authenticated, redirect them to the sign-in page
-      return res.redirect('/user/signin');
-    }
-  };
-  
-  module.exports = 
-  {isAuthenticated};
+const jwt = require('jsonwebtoken');
+
+// Middleware for authentication
+const authenticate = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token, authorization denied' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Token is not valid' });
+  }
+};
+
+module.exports = {
+  authenticate
+}
