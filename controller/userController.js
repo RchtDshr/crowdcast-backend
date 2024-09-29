@@ -70,7 +70,7 @@ const verifyOtp = async (req, res) => {
     await newUser.save();
     await UnverifiedUser.findByIdAndDelete(unverifiedUser._id);
    
-    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET);
 
     res.status(200).json({ 
       message: 'User verified successfully', 
