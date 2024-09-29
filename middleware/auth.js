@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 // Middleware for authentication
 const authenticate = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  const token =req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
     return res.status(401).json({ message: 'No token, authorization denied' });
@@ -13,7 +13,7 @@ const authenticate = (req, res, next) => {
     req.user = decoded.userId;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
+    res.status(401).json({ message: `Token is not valid ${error}` });
   }
 };
 

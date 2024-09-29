@@ -7,7 +7,7 @@ const advertisementSchema = new mongoose.Schema({
   },
   fileUpload: {
     type: String,  // Assuming you'll store the file path or URL as a string
-    required: true,
+    // required: true,
   },
   gender: {
     type: String,
@@ -28,6 +28,7 @@ const advertisementSchema = new mongoose.Schema({
     min: 0,  
     default: 0
   },
+  
 });
 
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
