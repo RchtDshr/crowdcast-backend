@@ -1,27 +1,30 @@
 const UnverifiedUser = require('../models/unverifiedUser');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { sendOtpToEmail } = require('../config/nodemailer');
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
+    const userwithOTP = await UnverifiedUser.findOne({ email });
+    if (userwithOTP) {
+      return res.status(400).json({ message: 'Check email to verify OTP' });
+    }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create unverified user
     const unverifiedUser = new UnverifiedUser({
       name,
       email,
@@ -31,13 +34,11 @@ const signup = async (req, res) => {
     });
 
     await unverifiedUser.save();
-
-    // Send OTP to email
     await sendOtpToEmail(email, otp);
 
     res.status(201).json({ message: 'User registered. Please verify your email.' });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -60,7 +61,6 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'OTP expired' });
     }
 
-    // Create verified user
     const newUser = new User({
       name: unverifiedUser.name,
       email: unverifiedUser.email,
@@ -68,62 +68,98 @@ const verifyOtp = async (req, res) => {
     });
 
     await newUser.save();
-
-    // Delete unverified user
     await UnverifiedUser.findByIdAndDelete(unverifiedUser._id);
+    const data = {
+      user: {
+        id: newUser.id,
+        // name: newUser.name,
+        // email: newUser.email,
+        // totalCredits: newUser.totalCredits
+      }
+    };
+    const token = jwt.sign(data, JWT_SECRET);
 
-    res.status(200).json({ message: 'User verified successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+      res.status(200).json({
+        message: 'User verified successfully',
+        token
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
 
 const signin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    // Find the user by email
-    const user = await User.findOne({ email });
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
 
-    // If user not found, return error
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
+      const data = {
+        user: {
+          id: user.id,
+          // name: user.name,
+          // email: user.email,
+          // totalCredits: user.totalCredits
+        }
+      };
+      const token = jwt.sign(data, JWT_SECRET);
+
+      res.status(200).json({
+        message: 'Signed in successfully',
+        token
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
+  };
 
-    // Compare the provided password with the hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
+  // API endpoint to get current user data
+const getUserData = async (req, res) => {
+    try {
+      // Extract token from Authorization header
+      const token = req.header('Authorization')?.replace('Bearer ', '');
 
-    // If passwords don't match, return error
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      if (!token) {
+        return res.status(401).json({ message: 'No token, authorization denied' });
+      }
+
+      // Verify the token
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      // Find the user in the database
+      const user = await User.findById(decoded.user.id);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Return the user data
+      res.json({
+        name: user.name,
+        email: user.email,
+        totalCredits: user.totalCredits,
+      });
+
+    } catch (error) {
+      console.error('Error in getUserData:', error.message);
+      res.status(401).json({ message: 'Invalid token' });
     }
+  };
 
-    // Create a session for the user
-    req.session.userId = user._id;
-    req.session.userEmail = user.email;
 
-    res.status(200).json({ message: 'Signed in successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-const signout = (req, res) => {
-  try {
-    // Destroy the user's session
-    req.session.destroy();
-    res.status(200).json({ message: 'Signed out successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-module.exports={
+  module.exports = {
     signup,
     verifyOtp,
     signin,
-    signout
-}
+    getUserData
+  };
