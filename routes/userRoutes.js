@@ -2,9 +2,8 @@ const express = require("express");
 const {
     signup,
     verifyOtp,
-    signin,
+    signin
 } = require('../controller/UserController');
-
 
 const router = express.Router();
 

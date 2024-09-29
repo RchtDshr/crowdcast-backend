@@ -113,8 +113,35 @@ const signin = async (req, res) => {
   }
 };
 
+// API endpoint to get current user data
+const getUserData = async (req, res) => {
+  try {
+    // Verify the token
+    const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
+    
+    // Find the employee in the database
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Return the user data
+    res.json({
+      name: user.name,
+      email: user.email,
+      totalCredits: user.totalCredits,
+    });
+
+  } catch (error) {
+    console.error('Error in /api/employee/user:', error);
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 module.exports = {
     signup,
     verifyOtp,
-    signin
+    signin,
+    getUserData
 };
