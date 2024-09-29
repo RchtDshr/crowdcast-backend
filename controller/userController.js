@@ -15,7 +15,7 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
     const userwithOTP = await UnverifiedUser.findOne({ email });
-    if (userwithOTP){
+    if (userwithOTP) {
       return res.status(400).json({ message: 'Check email to verify OTP' });
     }
 
@@ -69,79 +69,97 @@ const verifyOtp = async (req, res) => {
 
     await newUser.save();
     await UnverifiedUser.findByIdAndDelete(unverifiedUser._id);
-   
-    const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1h' });
+    const data = {
+      user: {
+        id: newUser.id,
+        // name: newUser.name,
+        // email: newUser.email,
+        // totalCredits: newUser.totalCredits
+      }
+    };
+    const token = jwt.sign(data, JWT_SECRET);
 
-    res.status(200).json({ 
-      message: 'User verified successfully', 
-      token,
-      userId: newUser._id,
-      userEmail: newUser.email
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+      res.status(200).json({
+        message: 'User verified successfully',
+        token
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
 
 const signin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid email or password' });
+      }
+      const data = {
+        user: {
+          id: user.id,
+          // name: user.name,
+          // email: user.email,
+          // totalCredits: user.totalCredits
+        }
+      };
+      const token = jwt.sign(data, JWT_SECRET);
+
+      res.status(200).json({
+        message: 'Signed in successfully',
+        token
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
+  };
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({ 
-      message: 'Signed in successfully', 
-      token,
-      userId: user._id,
-      userEmail: user.email
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// API endpoint to get current user data
+  // API endpoint to get current user data
 const getUserData = async (req, res) => {
-  try {
-    // Verify the token
-    const decoded = jwt.verify(req.token, process.env.JWT_SECRET);
-    
-    // Find the employee in the database
-    const user = await User.findById(decoded.userId);
-    
-    if (!user) {
-      return res.status(404).json({ message: 'Employee not found' });
+    try {
+      // Extract token from Authorization header
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+
+      if (!token) {
+        return res.status(401).json({ message: 'No token, authorization denied' });
+      }
+
+      // Verify the token
+      const decoded = jwt.verify(token, JWT_SECRET);
+
+      // Find the user in the database
+      const user = await User.findById(decoded.user.id);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Return the user data
+      res.json({
+        name: user.name,
+        email: user.email,
+        totalCredits: user.totalCredits,
+      });
+
+    } catch (error) {
+      console.error('Error in getUserData:', error.message);
+      res.status(401).json({ message: 'Invalid token' });
     }
+  };
 
-    // Return the user data
-    res.json({
-      name: user.name,
-      email: user.email,
-      totalCredits: user.totalCredits,
-    });
 
-  } catch (error) {
-    console.error('Error in /api/employee/user:', error);
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
-
-module.exports = {
+  module.exports = {
     signup,
     verifyOtp,
     signin,
     getUserData
-};
+  };
