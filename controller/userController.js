@@ -145,6 +145,7 @@ const getUserData = async (req, res) => {
 
       // Return the user data
       res.json({
+        id: user._id,
         name: user.name,
         email: user.email,
         totalCredits: user.totalCredits,

@@ -5,6 +5,7 @@ const createAd = async (req, res) => {
         // Parse the JSON string for ads
         const ads = JSON.parse(req.body.ads);
         const adName = req.body.adName; // Don't parse this, it should already be a string
+        const userId = req.body.userId;
 
         // Check if ads is an array
         if (!Array.isArray(ads)) {
@@ -24,7 +25,8 @@ const createAd = async (req, res) => {
                 gender: gender,
                 locationName: location,
                 ageGroup: ageGroup,
-                creditsDeducted: price
+                creditsDeducted: price,
+                userId
             });
 
             // Save the new advertisement

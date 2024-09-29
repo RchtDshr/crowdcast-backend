@@ -11,7 +11,7 @@ const advertisementSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['M', 'F'], 
+    enum: ['M', 'F'],
     required: true,
   },
   locationName: {
@@ -25,10 +25,14 @@ const advertisementSchema = new mongoose.Schema({
   },
   creditsDeducted: {
     type: Number,
-    min: 0,  
+    min: 0,
     default: 0
   },
-  
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  }
 });
 
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
