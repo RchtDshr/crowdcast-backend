@@ -6,8 +6,8 @@ const createAd = async (req, res) => {
         // Parse the JSON string for ads
         const ads = JSON.parse(req.body.ads);
         const adName = req.body.adName; // Don't parse this, it should already be a string
-        const userId = req.body.userId;
-
+        const userId = req.user;
+        
         // Check if ads is an array
         if (!Array.isArray(ads)) {
             return res.status(400).json({ message: 'Ads must be an array' });
@@ -60,7 +60,50 @@ const createAd = async (req, res) => {
     }
 };
 
+const getUserAds = async (req, res) => {
+    try {
+        const userId = req.user;  // Extracted from JWT by the middleware
+
+        // Find the user and populate their adsPosted field
+        const user = await User.findById(userId).populate('adsPosted', 'adName ageGroup locationName gender creditsDeducted');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Transform the ads array into a single object
+        const adsData = {
+            adName: user.adsPosted.length > 0 ? user.adsPosted[0].adName : '',  // Assume all ads have the same adName
+            locations: [],
+            genders: [],
+            ageGroups: [],
+            creditsDeducted: 0
+        };
+
+        user.adsPosted.forEach(ad => {
+            adsData.locations.push(ad.locationName);
+            adsData.genders.push(ad.gender);
+            adsData.ageGroups.push(ad.ageGroup);
+            adsData.creditsDeducted += ad.creditsDeducted;  // Sum credits deducted
+        });
+
+        // Removing duplicates in locations, genders, and ageGroups
+        adsData.locations = [...new Set(adsData.locations)];
+        adsData.genders = [...new Set(adsData.genders)];
+        adsData.ageGroups = [...new Set(adsData.ageGroups)];
+
+        res.status(200).json({
+            message: 'Ads retrieved successfully',
+            ads: adsData
+        });
+    } catch (error) {
+        console.error('Error retrieving user ads:', error);
+        res.status(500).json({ message: 'Error retrieving user ads', error: error.message });
+    }
+};
+
 
 module.exports = {
-    createAd
+    createAd,
+    getUserAds
 };

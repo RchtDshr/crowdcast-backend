@@ -15,7 +15,7 @@
             "port": 9229, // Optional: if using Node.js with --inspect or --inspect-brk
             "console": "internalConsole", // Run the app in the Debug Console instead of terminal
             "skipFiles": [
-                "<node_internals>/**"
+                "<node_internals>/"
             ], // Skip internal Node.js files in debugging
             "env": { // Optional: Specify environment variables
                 "NODE_ENV": "development"
