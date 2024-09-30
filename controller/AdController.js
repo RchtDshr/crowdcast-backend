@@ -1,4 +1,5 @@
 const Advertisement = require('../models/advertisement'); // Make sure to import your model
+const User = require('../models/user');
 
 const createAd = async (req, res) => {
     try {
@@ -14,6 +15,12 @@ const createAd = async (req, res) => {
 
         // Array to store created ads
         const createdAds = [];
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
         // Process each ad object
         for (const ad of ads) {
@@ -33,8 +40,14 @@ const createAd = async (req, res) => {
             const savedAd = await newAd.save();
             createdAds.push(savedAd);
 
-            console.log(`Ad created: Location: ${location}, Age Group: ${ageGroup}, Gender: ${gender}, Price: ${price}`);
+            // Add the saved ad ID to the user's adsPosted array
+            user.adsPosted.push(savedAd._id);
+
+            // console.log(`Ad created: Location: ${location}, Age Group: ${ageGroup}, Gender: ${gender}, Price: ${price}`);
         }
+
+        // Save the updated user
+        await user.save();
 
         // Send a success response with created ads
         res.status(200).json({ 
@@ -46,6 +59,7 @@ const createAd = async (req, res) => {
         res.status(500).json({ message: 'Error processing ads', error: error.message });
     }
 };
+
 
 module.exports = {
     createAd
