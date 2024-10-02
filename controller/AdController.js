@@ -1,5 +1,14 @@
 const Advertisement = require('../models/advertisement'); // Make sure to import your model
 const User = require('../models/user');
+const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const createAd = async (req, res) => {
     try {
@@ -102,8 +111,53 @@ const getUserAds = async (req, res) => {
     }
 };
 
+const uploadFiletoCloudinary = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            resource_type: 'auto', // Automatically detect if it's an image or video
+        });
+
+        // Remove the file from local storage
+        fs.unlinkSync(req.file.path);
+
+        res.json({
+            publicId: result.public_id,
+            url: result.secure_url,
+        });
+    } catch (error) {
+        console.error('Error uploading to Cloudinary:', error);
+        res.status(500).json({ error: 'Error uploading file' });
+    }
+}
+
+const removeFilefromCloudinary = async (req, res) => {
+    try {
+        const { publicId } = req.body;
+
+        if (!publicId) {
+            return res.status(400).json({ error: 'No public ID provided' });
+        }
+
+        const result = await cloudinary.uploader.destroy(publicId);
+
+        if (result.result === 'ok') {
+            res.json({ message: 'File removed successfully' });
+        } else {
+            res.status(500).json({ error: 'Error removing file from Cloudinary' });
+        }
+    } catch (error) {
+        console.error('Error removing file from Cloudinary:', error);
+        res.status(500).json({ error: 'Error removing file' });
+    }
+}
 
 module.exports = {
     createAd,
-    getUserAds
+    getUserAds,
+    uploadFiletoCloudinary,
+    removeFilefromCloudinary
 };
