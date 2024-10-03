@@ -33,7 +33,7 @@ const createAd = async (req, res) => {
 
         // Process each ad object
         for (const ad of ads) {
-            const { location, ageGroup, gender, price } = ad;
+            const { location, ageGroup, gender, price,fileUpload } = ad;
 
             // Create a new Advertisement object
             const newAd = new Advertisement({
@@ -41,6 +41,7 @@ const createAd = async (req, res) => {
                 gender: gender,
                 locationName: location,
                 ageGroup: ageGroup,
+                fileUpload:fileUpload,
                 creditsDeducted: price,
                 userId
             });
