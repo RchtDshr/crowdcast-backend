@@ -111,6 +111,7 @@ const getUserAds = async (req, res) => {
     }
 };
 
+
 const uploadFiletoCloudinary = async (req, res) => {
     try {
         if (!req.file) {
@@ -124,15 +125,25 @@ const uploadFiletoCloudinary = async (req, res) => {
         // Remove the file from local storage
         fs.unlinkSync(req.file.path);
 
-        res.json({
+        let response = {
             publicId: result.public_id,
             url: result.secure_url,
-        });
+            resourceType: result.resource_type,
+        };
+
+        // If it's a video, include the duration
+        if (result.resource_type === 'video') {
+            response.duration = result.duration;
+        }
+
+        res.json(response);
     } catch (error) {
         console.error('Error uploading to Cloudinary:', error);
         res.status(500).json({ error: 'Error uploading file' });
     }
-}
+};
+
+
 
 const removeFilefromCloudinary = async (req, res) => {
     try {
