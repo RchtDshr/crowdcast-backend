@@ -1,8 +1,11 @@
 const express = require("express");
 const { createAd, getUserAds, uploadFiletoCloudinary, removeFilefromCloudinary } = require("../controller/AdController");
 const { getUserData } = require("../controller/UserController");
-const multer = require('multer');
-const upload = multer({ dest: 'ads/' });
+// const multer = require('multer');
+// const upload = multer({ dest: 'ads/' });
+
+const createUploadMiddleware = require('../middleware/cloudinary');
+const upload = createUploadMiddleware('ads');
 
 const router = express.Router();
 

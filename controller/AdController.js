@@ -117,13 +117,14 @@ const uploadFiletoCloudinary = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
+        
 
         const result = await cloudinary.uploader.upload(req.file.path, {
             resource_type: 'auto', // Automatically detect if it's an image or video
         });
 
         // Remove the file from local storage
-        fs.unlinkSync(req.file.path);
+        // fs.unlinkSync(req.file.path);
 
         let response = {
             publicId: result.public_id,
