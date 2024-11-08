@@ -157,10 +157,67 @@ const getUserData = async (req, res) => {
     }
   };
 
+  const addCredits = async (req, res) => {
+    try {
+        const { userId, credits } = req.body;
+
+        // Find the user by ID and update the total credits
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $inc: { totalCredits: credits } },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'Credits added successfully',
+            totalCredits: user.totalCredits
+        });
+    } catch (error) {
+        console.error('Error adding credits:', error);
+        res.status(500).json({ message: 'Error adding credits', error: error.message });
+    }
+};
+
+// Function to reduce credits from a user
+const reduceCredits = async (req, res) => {
+    try {
+        const { userId, credits } = req.body;
+
+        // Find the user to check current credits
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Ensure that credits do not drop below zero
+        if (user.totalCredits < credits) {
+            return res.status(400).json({ message: 'Insufficient credits' });
+        }
+
+        // Deduct credits and save
+        user.totalCredits -= credits;
+        await user.save();
+
+        res.status(200).json({
+            message: 'Credits deducted successfully',
+            totalCredits: user.totalCredits
+        });
+    } catch (error) {
+        console.error('Error deducting credits:', error);
+        res.status(500).json({ message: 'Error deducting credits', error: error.message });
+    }
+};
+
 
   module.exports = {
     signup,
     verifyOtp,
     signin,
-    getUserData
+    getUserData,
+    addCredits,
+    reduceCredits
   };

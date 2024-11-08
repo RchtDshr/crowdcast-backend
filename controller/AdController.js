@@ -2,6 +2,7 @@ const Advertisement = require('../models/advertisement'); // Make sure to import
 const User = require('../models/user');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const { addAdToLocation } = require('./LocationController');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -30,6 +31,7 @@ const createAd = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        user.adsPosted=[];
 
         // Process each ad object
         for (const ad of ads) {
@@ -52,6 +54,8 @@ const createAd = async (req, res) => {
 
             // Add the saved ad ID to the user's adsPosted array
             user.adsPosted.push(savedAd._id);
+
+            await addAdToLocation(savedAd);
 
             // console.log(`Ad created: Location: ${location}, Age Group: ${ageGroup}, Gender: ${gender}, Price: ${price}`);
         }
@@ -168,9 +172,31 @@ const removeFilefromCloudinary = async (req, res) => {
     }
 }
 
+
+const getAdById = async (req, res) => {
+    try {
+        const { adId } = req.params;
+
+        const ad = await Advertisement.findById(adId);
+
+        if (!ad) {
+            return res.status(404).json({ message: 'Advertisement not found' });
+        }
+
+        res.status(200).json({
+            message: 'Advertisement retrieved successfully',
+            ad
+        });
+    } catch (error) {
+        console.error('Error retrieving advertisement:', error);
+        res.status(500).json({ message: 'Error retrieving advertisement', error: error.message });
+    }
+};
+
 module.exports = {
     createAd,
     getUserAds,
     uploadFiletoCloudinary,
-    removeFilefromCloudinary
+    removeFilefromCloudinary,
+    getAdById
 };

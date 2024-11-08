@@ -18,12 +18,12 @@ const userSchema = new Schema({
   },
   totalCredits: {
     type: Number,
-    default: 0,  // Total credits start at 0
-    min: 0,  // Ensures that credits cannot be negative
+    default: 0,  
+    min: 0, 
   },
   adsPosted: [{
     type: Schema.Types.ObjectId,
-    ref: 'Advertisement'  // References the Advertisement model
+    ref: 'Advertisement'  
   }],
 });
 
