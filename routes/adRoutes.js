@@ -18,4 +18,5 @@ router.post('/fetchAdIds',getAdIdsByGrouping);
 router.get("/getdetails", getUserAds);
 router.get('/:adId', getAdById);
 
+
 module.exports = router;

@@ -7,6 +7,7 @@ const {
     addCredits,
     reduceCredits
 } = require('../controller/UserController');
+const { addTimelineEntry, getTimelineEntriesByUserId } = require("../controller/TimelineController");
 
 const router = express.Router();
 
@@ -16,5 +17,7 @@ router.post("/signin", signin);
 router.get('/getUser', getUserData);
 router.post('/addCredits', addCredits);
 router.post('/reduceCredits', reduceCredits);
+router.post('/addToTimeline', addTimelineEntry);
+router.post('/getUserTimeline', getTimelineEntriesByUserId);
 
 module.exports = router;

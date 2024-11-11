@@ -17,8 +17,15 @@ const createAd = async (req, res) => {
         const ads = JSON.parse(req.body.ads);
         const adName = req.body.adName; // Don't parse this, it should already be a string
         const userId = req.user;
+        let type = req.body.type;
         
         // Check if ads is an array
+        if (type.startsWith('image')) {
+            type='image'
+        } else {
+             type='video'
+        }
+
         if (!Array.isArray(ads)) {
             return res.status(400).json({ message: 'Ads must be an array' });
         }
@@ -42,6 +49,7 @@ const createAd = async (req, res) => {
                 adName: adName,
                 gender: gender,
                 locationName: location,
+                type:type,
                 ageGroup: ageGroup,
                 fileUpload:fileUpload,
                 creditsDeducted: price,

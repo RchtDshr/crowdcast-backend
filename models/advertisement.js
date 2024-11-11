@@ -14,6 +14,11 @@ const advertisementSchema = new mongoose.Schema({
     enum: ['M', 'F'],
     required: true,
   },
+  type:{
+    type: String,
+    enum: ['image', 'video'],
+    required:true,
+  },
   locationName: {
     type: String,
     required: true,
