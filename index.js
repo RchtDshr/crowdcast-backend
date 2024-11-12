@@ -6,6 +6,7 @@ const app = express();
 require('dotenv').config();
 const userRoutes=require('./routes/userRoutes')
 const adRoutes = require('./routes/adRoutes') 
+const displayRoutes = require('./routes/displayRoutes') 
 const { authenticate } = require('./middleware/auth');
 
 // Middleware
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 //Api
 app.use("/user", userRoutes);
+app.use("/display", displayRoutes);
 app.use("/api", authenticate, adRoutes);
 
 // MongoDB Connection

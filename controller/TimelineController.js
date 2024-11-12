@@ -1,4 +1,5 @@
 const Timeline = require('../models/timeline'); // Assuming your model file is in models directory
+const User = require('../models/user');
 
 // Function to add a new timeline entry to the database
 exports.addTimelineEntry = async (req, res) => {
@@ -39,33 +40,45 @@ exports.addTimelineEntry = async (req, res) => {
 };
 
 exports.getTimelineEntriesByUserId = async (req, res) => {
-    try {
-      // Extract the userId from the request body
-      const userId= req.user; 
-  
-      // Validate that userId is provided
-      if (!userId) {
-        return res.status(400).json({ message: 'User ID is required.' });
-      }
-  
-      // Find all timeline entries that match the provided userId
-      const timelineEntries = await Timeline.find({ userId }); // Populate adId to get ad details if necessary
-  
-      // Check if entries were found
-      if (timelineEntries.length === 0) {
-        return res.status(404).json({ message: 'No timeline entries found for this user.' });
-      }
-  
-      // Respond with the found timeline entries
-      res.status(200).json({
-        message: 'Timeline entries fetched successfully!',
-        data: timelineEntries,
-      });
-    } catch (error) {
-      console.error('Error fetching timeline entries:', error);
-      res.status(500).json({
-        message: 'Failed to fetch timeline entries.',
-        error: error.message,
-      });
+  try {
+    // Extract the userId from the request body
+    const userId = req.user;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  };
+    // Validate that userId is provided
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required.' });
+    }
+
+    // Use aggregation to match adId in Timeline with adsPosted array in Users
+    const timelineEntries = await Timeline.aggregate([
+      {
+        $match: {
+          adId: { $in: user.adsPosted }
+        }
+      },
+      {
+        $sort: { timeOfDisplay: -1 }
+      }
+    ]);
+    // Check if entries were found
+    if (timelineEntries.length === 0) {
+      return res.status(404).json({ message: 'No timeline entries found for this user.' });
+    }
+
+    // Respond with the found timeline entries
+    res.status(200).json({
+      message: 'Timeline entries fetched successfully!',
+      data: timelineEntries,
+    });
+  } catch (error) {
+    console.error('Error fetching timeline entries:', error);
+    res.status(500).json({
+      message: 'Failed to fetch timeline entries.',
+      error: error.message,
+    });
+  }
+};

@@ -127,6 +127,7 @@ const getUserAds = async (req, res) => {
 
 const uploadFiletoCloudinary = async (req, res) => {
     try {
+        console.log(req.file);
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
@@ -135,9 +136,6 @@ const uploadFiletoCloudinary = async (req, res) => {
         const result = await cloudinary.uploader.upload(req.file.path, {
             resource_type: 'auto', // Automatically detect if it's an image or video
         });
-
-        // Remove the file from local storage
-        // fs.unlinkSync(req.file.path);
 
         let response = {
             publicId: result.public_id,
@@ -152,12 +150,10 @@ const uploadFiletoCloudinary = async (req, res) => {
 
         res.json(response);
     } catch (error) {
-        console.error('Error uploading to Cloudinary:', error);
+        console.log('Error uploading to Cloudinary:', error);
         res.status(500).json({ error: 'Error uploading file' });
     }
 };
-
-
 
 const removeFilefromCloudinary = async (req, res) => {
     try {
