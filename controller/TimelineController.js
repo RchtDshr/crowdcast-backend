@@ -41,7 +41,7 @@ exports.addTimelineEntry = async (req, res) => {
 exports.getTimelineEntriesByUserId = async (req, res) => {
     try {
       // Extract the userId from the request body
-      const { userId } = req.body;
+      const userId= req.user; 
   
       // Validate that userId is provided
       if (!userId) {
@@ -49,7 +49,7 @@ exports.getTimelineEntriesByUserId = async (req, res) => {
       }
   
       // Find all timeline entries that match the provided userId
-      const timelineEntries = await Timeline.find({ userId }).populate('adId', 'adName'); // Populate adId to get ad details if necessary
+      const timelineEntries = await Timeline.find({ userId }); // Populate adId to get ad details if necessary
   
       // Check if entries were found
       if (timelineEntries.length === 0) {
