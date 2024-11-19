@@ -157,13 +157,16 @@ const uploadFiletoCloudinary = async (req, res) => {
 
 const removeFilefromCloudinary = async (req, res) => {
     try {
-        const { publicId } = req.body;
+        const { publicId, resourceType } = req.body;
 
         if (!publicId) {
             return res.status(400).json({ error: 'No public ID provided' });
         }
 
-        const result = await cloudinary.uploader.destroy(publicId);
+        // Default to 'image' if resourceType is not provided, else use the provided type
+        const type = resourceType || 'image';
+
+        const result = await cloudinary.uploader.destroy(publicId, { resource_type: type });
 
         if (result.result === 'ok') {
             res.json({ message: 'File removed successfully' });
@@ -174,7 +177,8 @@ const removeFilefromCloudinary = async (req, res) => {
         console.error('Error removing file from Cloudinary:', error);
         res.status(500).json({ error: 'Error removing file' });
     }
-}
+};
+
 
 
 const getAdById = async (req, res) => {
