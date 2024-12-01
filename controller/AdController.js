@@ -221,7 +221,32 @@ const deleteAdvertisements = async (adIds) => {
     }
 };
 
-module.exports = deleteAdvertisements;
+const deleteAdsByUserIds = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await removeAdIdsFromAllLocations(user.adsPosted);
+        await deleteAdvertisements(user.adsPosted);
+        user.adsPosted = [];
+        await user.save();
+        // Return success response
+        return res.status(200).json({
+            message: 'Advertisements for the user deleted successfully.',
+        });
+    } catch (error) {
+        console.error('Error deleting advertisements by user:', error);
+        // Return error response
+        return res.status(500).json({
+            message: 'Error deleting advertisements by user.',
+            error: error.message,
+        });
+    }
+};
 
 
 module.exports = {
@@ -229,5 +254,6 @@ module.exports = {
     getUserAds,
     uploadFiletoCloudinary,
     removeFilefromCloudinary,
-    getAdById
+    getAdById,
+    deleteAdsByUserIds
 };
