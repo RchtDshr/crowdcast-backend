@@ -2,7 +2,7 @@ const Advertisement = require('../models/advertisement'); // Make sure to import
 const User = require('../models/user');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
-const { addAdToLocation } = require('./LocationController');
+const { addAdToLocation, removeAdIdsFromAllLocations } = require('./LocationController');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -18,12 +18,12 @@ const createAd = async (req, res) => {
         const adName = req.body.adName; // Don't parse this, it should already be a string
         const userId = req.user;
         let type = req.body.type;
-        
+
         // Check if ads is an array
         if (type.startsWith('image')) {
-            type='image'
+            type = 'image'
         } else {
-             type='video'
+            type = 'video'
         }
 
         if (!Array.isArray(ads)) {
@@ -38,20 +38,22 @@ const createAd = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        user.adsPosted=[];
+        await removeAdIdsFromAllLocations(user.adsPosted);
+        await deleteAdvertisements(user.adsPosted);
+        user.adsPosted = [];
 
         // Process each ad object
         for (const ad of ads) {
-            const { location, ageGroup, gender, price,fileUpload } = ad;
+            const { location, ageGroup, gender, price, fileUpload } = ad;
 
             // Create a new Advertisement object
             const newAd = new Advertisement({
                 adName: adName,
                 gender: gender,
                 locationName: location,
-                type:type,
+                type: type,
                 ageGroup: ageGroup,
-                fileUpload:fileUpload,
+                fileUpload: fileUpload,
                 creditsDeducted: price,
                 userId
             });
@@ -72,9 +74,9 @@ const createAd = async (req, res) => {
         await user.save();
 
         // Send a success response with created ads
-        res.status(200).json({ 
-            message: 'Ads processed and saved successfully', 
-            ads: createdAds 
+        res.status(200).json({
+            message: 'Ads processed and saved successfully',
+            ads: createdAds
         });
     } catch (error) {
         console.error('Error processing ads:', error);
@@ -131,7 +133,7 @@ const uploadFiletoCloudinary = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
-        
+
 
         const result = await cloudinary.uploader.upload(req.file.path, {
             resource_type: 'auto', // Automatically detect if it's an image or video
@@ -200,6 +202,27 @@ const getAdById = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving advertisement', error: error.message });
     }
 };
+
+const deleteAdvertisements = async (adIds) => {
+    try {
+        // Check if adIds is valid
+        if (!Array.isArray(adIds) || adIds.length === 0) {
+            console.log('No AdIds provided to delete. Exiting function.');
+            return;
+        }
+
+        // Delete advertisements by IDs
+        const result = await Advertisement.deleteMany({ _id: { $in: adIds } });
+
+        console.log(`${result.deletedCount} advertisement(s) deleted successfully.`);
+    } catch (error) {
+        console.error('Error deleting advertisements:', error);
+        throw error; // Re-throw the error to handle it at the caller
+    }
+};
+
+module.exports = deleteAdvertisements;
+
 
 module.exports = {
     createAd,

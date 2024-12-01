@@ -5,7 +5,7 @@ const Advertisement = require('../models/advertisement');
 const addAdToLocation = async (ad) => {
     try {
         const { locationName, ageGroup, gender, id: adId } = ad;
-        
+
         // Find or create the location document
         let location = await Location.findOne({ locationName });
         if (!location) {
@@ -73,8 +73,49 @@ const getAdIdsByGrouping = async (req, res) => {
     }
 };
 
+const removeAdIdsFromAllLocations = async (adIds) => {
+    try {
+        // Check if adIds is valid
+        if (!Array.isArray(adIds) || adIds.length === 0) {
+            console.log('No AdIds provided to remove. Exiting function.');
+            return;
+        }
+
+        // Find all locations
+        const locations = await Location.find();
+
+        // Loop through each location and update adGroupings
+        for (const location of locations) {
+            let modified = false;
+
+            location.adGroupings.forEach((group) => {
+                const originalLength = group.adIds.length;
+
+                // Filter out the specified adIds
+                group.adIds = group.adIds.filter((id) => !adIds.includes(id.toString()));
+
+                if (group.adIds.length !== originalLength) {
+                    modified = true; // Track if any changes were made
+                }
+            });
+
+            // Save the location document if any modifications were made
+            if (modified) {
+                location.markModified('adGroupings');
+                await location.save();
+            }
+        }
+
+        console.log('AdIds removed successfully from all locations.');
+    } catch (error) {
+        console.error('Error removing AdIds from all locations:', error);
+        throw error; // Re-throw to allow caller to handle it
+    }
+};
+
 
 module.exports = {
     addAdToLocation,
     getAdIdsByGrouping,
+    removeAdIdsFromAllLocations,
 };
