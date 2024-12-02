@@ -129,7 +129,6 @@ const getUserAds = async (req, res) => {
 
 const uploadFiletoCloudinary = async (req, res) => {
     try {
-        console.log(req.file);
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
@@ -223,10 +222,13 @@ const deleteAdvertisements = async (adIds) => {
 
 const deleteAdsByUserIds = async (req, res) => {
     try {
-        const { userId } = req.body;
-
+        // const { userId } = req.user;
+        const userId = req.user;
+        
         // Find the user
+        console.log(userId)
         const user = await User.findById(userId);
+        console.log(user.adsPosted)
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

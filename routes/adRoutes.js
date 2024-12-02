@@ -16,7 +16,7 @@ router.post('/upload', upload.single('file'), uploadFiletoCloudinary);
 router.post('/remove',upload.single('file'), removeFilefromCloudinary);
 router.post('/fetchAdIds',getAdIdsByGrouping);
 router.get("/getdetails", getUserAds);
-router.post('/delete',deleteAdsByUserIds)
+router.delete('/delete',deleteAdsByUserIds)
 router.get('/:adId', getAdById);
 
 
