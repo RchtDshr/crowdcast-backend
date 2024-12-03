@@ -10,7 +10,11 @@ const displayRoutes = require('./routes/displayRoutes')
 const { authenticate } = require('./middleware/auth');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://crowdcast-frontend.vercel.app'], // Replace with your frontend URLs
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // If cookies or authorization headers are needed
+}));
 app.use(bodyParser.json());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
