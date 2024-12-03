@@ -5,7 +5,7 @@ const {
     signin,
     getUserData,
     addCredits
-} = require('../controller/UserController');
+} = require('../controller/userController');
 const { getTimelineEntriesByUserId } = require("../controller/TimelineController");
 const { authenticate } = require("../middleware/auth");
 

@@ -1,6 +1,6 @@
 const express = require("express");
-const { createAd, getUserAds, uploadFiletoCloudinary, removeFilefromCloudinary, getAdById, deleteAdsByUserController, deleteAdsByUserIds } = require("../controller/AdController");
-const { getUserData } = require("../controller/UserController");
+const { createAd, getUserAds, uploadFiletoCloudinary, removeFilefromCloudinary, getAdById, deleteAdsByuserController, deleteAdsByUserIds } = require("../controller/AdController");
+const { getUserData } = require("../controller/userController");
 // const multer = require('multer');
 // const upload = multer({ dest: 'ads/' });
 

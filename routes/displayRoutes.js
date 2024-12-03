@@ -1,7 +1,7 @@
 const express = require("express");
 const { getAdIdsByGrouping } = require("../controller/LocationController");
 const { getAdById } = require("../controller/AdController");
-const { reduceCredits } = require("../controller/UserController");
+const { reduceCredits } = require("../controller/userController");
 const { addTimelineEntry } = require("../controller/TimelineController");
 const router = express.Router();
 
